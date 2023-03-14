@@ -84,9 +84,17 @@ class BookController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $id, BookRepository $book)
     {
-        //
+        $request->validate([
+            'name' => 'required',
+            'author' => 'required',
+            'category' => 'required',
+        ]);
+
+        $book->update($id, $request->only('name', 'author', 'category'));
+
+        return Redirect::route('admin.books')->with('status', 'book-updated');
     }
 
     /**
@@ -95,8 +103,13 @@ class BookController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy($id, BookRepository $book)
     {
-        //
+        try {
+            $book->remove($id);
+            return Redirect::route('admin.books')->with('status', 'book-removed');
+        } catch (\Exception $e) {
+            return $e->getMessage();
+        }
     }
 }
